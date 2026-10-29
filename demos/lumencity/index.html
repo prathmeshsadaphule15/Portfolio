@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LumenCity · Street Lighting Control</title>
+  <meta name="description" content="Smart City Light Management System: adaptive street lighting, fault detection, maintenance dispatch and energy analytics." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232f6df6'/%3E%3Cpath d='M11 9h7a3 3 0 0 1 3 3v1' stroke='white' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3Cpath d='M11 9v16' stroke='white' stroke-width='2.4' stroke-linecap='round'/%3E%3Ccircle cx='21' cy='16' r='3' fill='%23ffc94d'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=20261025b" />
+</head>
+<body>
+  <!-- ============ ICONS ============ -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="8" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="15" width="7" height="6" rx="1.5"/></symbol>
+      <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="m2 13 10 5 10-5"/></symbol>
+      <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+      <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0 5 5L21 13l-8 8-3-3 6.5-6.5a4 4 0 0 1-5-5L13 5z"/><path d="m3 21 6-6"/></symbol>
+      <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></symbol>
+      <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 .5-8A6 6 0 0 0 6 9.5 4.3 4.3 0 0 0 7 18z"/></symbol>
+      <symbol id="i-rain" viewBox="0 0 24 24"><path d="M7 15h10a4 4 0 0 0 .5-8A6 6 0 0 0 6 6.5 4.3 4.3 0 0 0 7 15z"/><path d="m8 18-1 3M12 18l-1 3M16 18l-1 3"/></symbol>
+      <symbol id="i-fog" viewBox="0 0 24 24"><path d="M4 9h16M2 13h14M6 17h16M8 5h10"/></symbol>
+      <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17v.5"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></symbol>
+      <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+      <symbol id="i-siren" viewBox="0 0 24 24"><path d="M6 18v-6a6 6 0 0 1 12 0v6"/><path d="M4 18h16v3H4zM12 2v2M3.5 6.5l1.4 1.4M20.5 6.5l-1.4 1.4"/></symbol>
+      <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19c0-9 6-14 15-14 0 9-5 15-14 15"/><path d="M5 19 13 11"/></symbol>
+      <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+      <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+      <symbol id="i-truck" viewBox="0 0 24 24"><path d="M2 6h11v10H2zM13 9h4l4 4v3h-8z"/><circle cx="6" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+      <symbol id="i-co2" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0"/><path d="M7.5 14.5c1.5 1.5 3 2 4.5 2s3.5-1 4.5-3c-2-1-4-1.5-6-.5"/></symbol>
+      <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></symbol>
+      <symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/></symbol>
+      <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10.5 10.5 0 0 1 14 0M8.5 15.5a5.5 5.5 0 0 1 7 0"/><circle cx="12" cy="19" r="1"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+      <symbol id="i-activity" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></symbol>
+      <symbol id="i-rupee" viewBox="0 0 24 24"><path d="M6 4h12M6 9h12M14.5 4c4 0 4 9-1 9H6l8 7"/></symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- ============ SPLASH ============ -->
+  <div id="splash" class="splash" role="status" aria-live="polite">
+    <div class="splash-card">
+      <svg class="splash-mark" viewBox="0 0 64 64" aria-hidden="true">
+        <rect class="sm-bg" x="2" y="2" width="60" height="60" rx="16"/>
+        <path class="sm-pole" d="M22 52V20a4 4 0 0 1 4-4h14a4 4 0 0 1 4 4v3"/>
+        <circle class="sm-lamp" cx="44" cy="30" r="5"/>
+        <path class="sm-beam" d="M44 35 34 54h20z"/>
+      </svg>
+      <h1>LumenCity</h1>
+      <p>Smart City Light Management System</p>
+      <ul class="boot" id="boot"></ul>
+      <div class="splash-progress"><i id="splashBar"></i></div>
+    </div>
+    <span class="splash-foot">Mini Project · RBT24CB034 · Click to skip</span>
+  </div>
+
+  <!-- ============ APP ============ -->
+  <div class="app" id="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+          <rect x="2" y="2" width="60" height="60" rx="16" fill="#2f6df6"/>
+          <path d="M22 52V20a4 4 0 0 1 4-4h14a4 4 0 0 1 4 4v3" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <circle cx="44" cy="30" r="5" fill="#ffc94d"/>
+          <path d="M44 35 34 54h20z" fill="#ffc94d" opacity=".35"/>
+        </svg>
+        <div><b>LumenCity</b><small>Street Lighting Control</small></div>
+      </div>
+
+      <nav class="nav" id="nav">
+        <span class="nav-label">Monitor</span>
+        <a href="#overview" data-page="overview"><svg><use href="#i-grid"/></svg><span>Overview</span></a>
+        <a href="#analytics" data-page="analytics"><svg><use href="#i-chart"/></svg><span>Energy analytics</span></a>
+        <span class="nav-label">Operate</span>
+        <a href="#zones" data-page="zones"><svg><use href="#i-layers"/></svg><span>Zones</span></a>
+        <a href="#schedules" data-page="schedules"><svg><use href="#i-calendar"/></svg><span>Schedules</span></a>
+        <a href="#maintenance" data-page="maintenance"><svg><use href="#i-wrench"/></svg><span>Maintenance</span><em class="nav-count" id="navBadge" hidden>0</em></a>
+        <span class="nav-label">Project</span>
+        <a href="#about" data-page="about"><svg><use href="#i-info"/></svg><span>About</span></a>
+      </nav>
+
+      <div class="side-status">
+        <div class="ss-row"><span><svg><use href="#i-wifi"/></svg>Network</span><b id="ssNodes">104 / 104</b></div>
+        <div class="ss-bar"><i id="ssNodesBar"></i></div>
+        <div class="ss-row"><span><svg><use href="#i-sun"/></svg>Ambient light</span><b id="luxVal">0 lx</b></div>
+        <div class="ss-bar"><i id="luxBar" class="amber"></i></div>
+      </div>
+
+      <div class="user">
+        <div class="avatar">PS</div>
+        <div><b>Prathmesh S.</b><small>Operator · RBT24CB034</small></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="crumbs"><span>LumenCity</span><svg><use href="#i-chevron"/></svg><b id="crumb">Overview</b></div>
+        <form class="search" id="searchForm" autocomplete="off">
+          <svg><use href="#i-search"/></svg>
+          <input id="searchInput" type="search" placeholder="Find a light or zone, e.g. SL-030" list="searchList" aria-label="Find a light or zone" />
+          <kbd>/</kbd>
+          <datalist id="searchList"></datalist>
+        </form>
+        <div class="tb-spacer"></div>
+
+        <div class="clock" title="Simulated city time">
+          <span class="clock-icon" id="clockIcon"><svg><use href="#i-moon"/></svg></span>
+          <span class="clock-time" id="clockTime">18:00</span>
+          <span class="clock-sub" id="clockSub">Day 1</span>
+        </div>
+
+        <div class="seg" role="group" aria-label="Simulation speed">
+          <button data-speed="0" title="Pause"><svg><use href="#i-pause"/></svg></button>
+          <button data-speed="1" title="1 simulated minute per second">1×</button>
+          <button data-speed="10" class="active" title="10 simulated minutes per second">10×</button>
+          <button data-speed="60" title="1 simulated hour per second">60×</button>
+        </div>
+
+        <div class="seg" role="group" aria-label="Weather">
+          <button data-weather="clear" class="active" title="Clear"><svg><use href="#i-sun"/></svg></button>
+          <button data-weather="cloudy" title="Cloudy"><svg><use href="#i-cloud"/></svg></button>
+          <button data-weather="rain" title="Rain"><svg><use href="#i-rain"/></svg></button>
+          <button data-weather="fog" title="Fog"><svg><use href="#i-fog"/></svg></button>
+        </div>
+
+        <a class="bell" href="#maintenance" id="bell" title="Open alerts"><svg><use href="#i-bell"/></svg><em id="bellCount" hidden>0</em></a>
+        <button class="btn btn-danger-outline" id="emergencyBtn" title="Force every working light to 100%"><svg><use href="#i-siren"/></svg><span>Emergency</span></button>
+      </header>
+
+      <!-- ===== OVERVIEW ===== -->
+      <section class="page" id="page-overview">
+        <div class="sky-card reveal" id="skyCard">
+          <canvas id="skyCanvas" aria-hidden="true"></canvas>
+          <div class="sky-text">
+            <span class="eyebrow" id="skyPhase">Dusk</span>
+            <h1 id="skyTitle">Street lights are switching on</h1>
+            <p id="skySub">Sunset 18:30 · Sunrise 06:00</p>
+          </div>
+          <div class="sky-stats">
+            <div><span>Ambient</span><b id="skyLux">0 lx</b></div>
+            <div><span>Weather</span><b id="skyWeather">Clear</b></div>
+            <div><span>Traffic</span><b id="skyTraffic">Moderate</b></div>
+          </div>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi reveal">
+            <div class="kpi-top"><span class="ico-tile blue"><svg><use href="#i-bulb"/></svg></span><span class="trend" id="kOnlineTrend"></span></div>
+            <span class="kpi-label">Lights online</span>
+            <b class="kpi-val" id="kOnline">0</b>
+            <div class="meter"><i id="kOnlineBar"></i></div>
+            <span class="kpi-foot" id="kOnlineFoot">of 0 nodes</span>
+          </div>
+          <div class="kpi reveal">
+            <div class="kpi-top"><span class="ico-tile amber"><svg><use href="#i-bolt"/></svg></span><span class="trend" id="kPowerTrend"></span></div>
+            <span class="kpi-label">Live load</span>
+            <b class="kpi-val" id="kPower">0 kW</b>
+            <svg class="spark" id="sparkPower" viewBox="0 0 120 28" preserveAspectRatio="none"></svg>
+            <span class="kpi-foot" id="kPowerFoot">Conventional: 0 kW</span>
+          </div>
+          <div class="kpi reveal">
+            <div class="kpi-top"><span class="ico-tile green"><svg><use href="#i-leaf"/></svg></span><span class="trend" id="kSavedTrend"></span></div>
+            <span class="kpi-label">Energy saved today</span>
+            <b class="kpi-val" id="kSaved">—</b>
+            <div class="meter"><i id="kSavedBar" class="green"></i></div>
+            <span class="kpi-foot" id="kSavedFoot">vs. conventional lamps</span>
+          </div>
+          <div class="kpi reveal">
+            <div class="kpi-top"><span class="ico-tile teal"><svg><use href="#i-co2"/></svg></span><span class="trend" id="kCo2Trend"></span></div>
+            <span class="kpi-label">CO₂ avoided today</span>
+            <b class="kpi-val" id="kCo2">0 kg</b>
+            <span class="kpi-foot trees" id="kTrees"></span>
+            <span class="kpi-foot" id="kCost">₹0 saved</span>
+          </div>
+          <div class="kpi reveal" id="kpiFaults">
+            <div class="kpi-top"><span class="ico-tile red"><svg><use href="#i-alert"/></svg></span><span class="trend" id="kFaultsTrend"></span></div>
+            <span class="kpi-label">Open faults</span>
+            <b class="kpi-val" id="kFaults">0</b>
+            <span class="badge" id="kFaultsBadge"><i></i>All clear</span>
+            <span class="kpi-foot" id="kFaultsFoot">No crews deployed</span>
+          </div>
+        </div>
+
+        <div class="ov-grid">
+          <div class="main-col">
+          <div class="card dark map-card reveal">
+            <div class="card-head">
+              <div><h3>Live city map</h3><p class="sub">104 connected street lights · drag to pan, scroll to zoom</p></div>
+              <div class="toggles">
+                <button class="toggle on" data-layer="traffic"><i></i>Traffic</button>
+                <button class="toggle on" data-layer="network"><i></i>Network</button>
+                <button class="toggle" data-layer="sensors"><i></i>Sensors</button>
+                <button class="toggle on" data-layer="labels"><i></i>Labels</button>
+              </div>
+            </div>
+            <div class="map-wrap" id="mapWrap">
+              <canvas id="cityCanvas" aria-label="Live city map with street lights"></canvas>
+              <div class="map-tip" id="mapTip"></div>
+              <div class="map-zoom">
+                <button id="zoomIn" title="Zoom in"><svg><use href="#i-plus"/></svg></button>
+                <button id="zoomOut" title="Zoom out"><svg><use href="#i-minus"/></svg></button>
+                <button id="zoomReset" title="Reset view"><svg><use href="#i-expand"/></svg></button>
+              </div>
+              <div class="map-time">
+                <svg><use href="#i-sun"/></svg>
+                <input type="range" id="timeSlider" min="0" max="1439" step="1" aria-label="Simulated time of day" />
+                <svg><use href="#i-moon"/></svg>
+              </div>
+            </div>
+            <div class="map-foot">
+              <span><i class="dot on"></i>Full</span>
+              <span><i class="dot dim"></i>Dimmed</span>
+              <span><i class="dot off"></i>Off</span>
+              <span><i class="dot fault"></i>Fault</span>
+              <span><i class="dot maint"></i>Repairing</span>
+              <span><i class="dot net"></i>Data packet</span>
+            </div>
+          </div>
+
+          <div class="card reveal">
+            <div class="card-head"><div><h3>Zones at a glance</h3><p class="sub">Average brightness and live load per zone</p></div><a class="link" href="#zones">Manage zones<svg><use href="#i-chevron"/></svg></a></div>
+            <div class="zone-strip" id="zoneStrip"></div>
+          </div>
+          </div>
+
+          <div class="side-col">
+            <div class="card dark inspector reveal">
+              <div class="card-head"><div><h3>Light inspector</h3><p class="sub" id="inspSub">Select a light on the map</p></div>
+                <button class="icon-btn" id="inspClose" title="Clear selection" hidden><svg><use href="#i-x"/></svg></button>
+              </div>
+              <div class="lamp-stage" id="lampStage">
+                <svg viewBox="0 0 260 150" class="lamp-svg" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="beamGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#ffd36b" stop-opacity=".85"/>
+                      <stop offset="1" stop-color="#ffd36b" stop-opacity="0"/>
+                    </linearGradient>
+                    <radialGradient id="poolGrad"><stop offset="0" stop-color="#ffd36b" stop-opacity=".9"/><stop offset="1" stop-color="#ffd36b" stop-opacity="0"/></radialGradient>
+                    <linearGradient id="stageSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" id="stageTop" stop-color="#1b2540"/><stop offset="1" id="stageBottom" stop-color="#2d3a5c"/></linearGradient>
+                  </defs>
+                  <rect width="260" height="150" fill="url(#stageSky)"/>
+                  <rect y="128" width="260" height="22" fill="#3b4558"/>
+                  <path d="M0 136h260" stroke="#e9edf3" stroke-width="1.5" stroke-dasharray="10 9" opacity=".45"/>
+                  <ellipse id="lampPool" cx="150" cy="132" rx="70" ry="10" fill="url(#poolGrad)" opacity="0"/>
+                  <path id="lampBeam" d="M150 44 92 132h116z" fill="url(#beamGrad)" opacity="0"/>
+                  <g id="lampCar" class="lamp-car" opacity="0">
+                    <rect x="0" y="118" width="34" height="11" rx="4" fill="#e9edf3"/>
+                    <rect x="7" y="112" width="18" height="8" rx="3" fill="#cbd3de"/>
+                    <circle cx="8" cy="130" r="3" fill="#1b2232"/><circle cx="27" cy="130" r="3" fill="#1b2232"/>
+                  </g>
+                  <path d="M96 134V36a6 6 0 0 1 6-6h40" stroke="#8a95a6" stroke-width="5" fill="none" stroke-linecap="round"/>
+                  <rect x="132" y="28" width="38" height="10" rx="5" fill="#a9b3c2"/>
+                  <ellipse id="lampHead" cx="150" cy="40" rx="13" ry="4" fill="#5c6677"/>
+                  <rect x="88" y="132" width="16" height="5" rx="2" fill="#6b7586"/>
+                  <g id="lampFault" opacity="0">
+                    <circle cx="150" cy="40" r="14" fill="none" stroke="#d03b3b" stroke-width="2" class="fault-pulse"/>
+                  </g>
+                </svg>
+                <div class="lamp-readout">
+                  <b id="inspLevel">—</b><span>brightness</span>
+                </div>
+              </div>
+              <div class="insp-body" id="inspectorBody" hidden>
+                <div class="insp-title">
+                  <div><h4 id="inspId">SL-000</h4><span class="zone-tag" id="inspZone">Zone</span></div>
+                  <span class="badge" id="inspStatus"><i></i>Operational</span>
+                </div>
+                <dl class="facts">
+                  <div><dt>Power draw</dt><dd id="inspPower">0 W</dd></div>
+                  <div><dt>Energy today</dt><dd id="inspEnergy">0 Wh</dd></div>
+                  <div><dt>Motion sensor</dt><dd id="inspMotion">Idle</dd></div>
+                  <div><dt>Control mode</dt><dd id="inspMode">Auto</dd></div>
+                </dl>
+                <label class="field-range">
+                  <span>Manual override <b id="inspOvVal">Auto</b></span>
+                  <input type="range" min="0" max="100" step="5" id="inspOverride" />
+                </label>
+                <div class="btn-row">
+                  <button class="btn" id="inspAuto">Return to auto</button>
+                  <button class="btn btn-danger-outline" id="inspFault">Report fault</button>
+                </div>
+              </div>
+              <p class="insp-empty" id="inspectorEmpty">Click any street light on the map to see its live sensors, power draw and controls.</p>
+            </div>
+
+            <div class="card feed-card reveal">
+              <div class="card-head"><div><h3>Activity</h3><p class="sub">System events in real time</p></div><span class="live-ind"><i></i>Live</span></div>
+              <ul class="feed" id="feed"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== ZONES ===== -->
+      <section class="page" id="page-zones">
+        <div class="page-head">
+          <div><h2>Zones</h2><p>Each zone runs its own lighting policy. <b>Auto</b> dims to the base level and brightens on motion. <b>Eco</b> saves extra power late at night. <b>Manual</b> holds a fixed level.</p></div>
+          <div class="head-actions">
+            <button class="btn" id="allAuto">Set all to Auto</button>
+            <button class="btn btn-primary" id="allEco"><svg><use href="#i-leaf"/></svg>All zones Eco</button>
+          </div>
+        </div>
+        <div class="zone-grid" id="zoneGrid"></div>
+      </section>
+
+      <!-- ===== ANALYTICS ===== -->
+      <section class="page" id="page-analytics">
+        <div class="page-head">
+          <div><h2>Energy analytics</h2><p>Adaptive LED consumption compared with conventional 150 W sodium lamps that run at full power from dusk to dawn.</p></div>
+        </div>
+        <div class="an-tiles">
+          <div class="an-tile reveal"><span class="ico-tile blue"><svg><use href="#i-bulb"/></svg></span><div><span>Smart LED today</span><b id="aSmart">0 kWh</b></div></div>
+          <div class="an-tile reveal"><span class="ico-tile orange"><svg><use href="#i-bolt"/></svg></span><div><span>Conventional today</span><b id="aBase">0 kWh</b></div></div>
+          <div class="an-tile reveal"><span class="ico-tile green"><svg><use href="#i-leaf"/></svg></span><div><span>Saved this week</span><b id="aWeek">0 kWh</b></div></div>
+          <div class="an-tile reveal"><span class="ico-tile teal"><svg><use href="#i-rupee"/></svg></span><div><span>Bill saved this week</span><b id="aWeekCost">₹0</b></div></div>
+        </div>
+        <div class="an-grid">
+          <div class="card span-2 reveal">
+            <div class="card-head">
+              <div><h3>Hourly energy use today</h3><p class="sub" id="hourlySub">kWh per hour</p></div>
+              <button class="btn btn-sm" id="hourlyTableBtn"><svg><use href="#i-table"/></svg><span>Table</span></button>
+            </div>
+            <div class="legend" id="hourlyLegend"></div>
+            <div class="chart" id="chartHourly"></div>
+            <div class="table-wrap" id="hourlyTable" hidden></div>
+          </div>
+          <div class="card reveal">
+            <div class="card-head"><div><h3>Savings vs. conventional</h3><p class="sub">Share of energy saved today</p></div></div>
+            <div class="ring-wrap">
+              <svg viewBox="0 0 160 160" class="ring">
+                <circle cx="80" cy="80" r="64" class="ring-track"/>
+                <circle cx="80" cy="80" r="64" class="ring-fill" id="savingRing"/>
+              </svg>
+              <div class="ring-val"><b id="ringPct">0%</b><span>saved</span></div>
+            </div>
+            <div class="ring-legend">
+              <div><span class="sw" style="background:#2a78d6"></span>Smart LED<b id="ringSmart">0 kWh</b></div>
+              <div><span class="sw" style="background:#eb6834"></span>Conventional<b id="ringBase">0 kWh</b></div>
+            </div>
+          </div>
+          <div class="card reveal">
+            <div class="card-head"><div><h3>Energy saved per day</h3><p class="sub">kWh, last 7 days</p></div></div>
+            <div class="chart" id="chartWeek"></div>
+          </div>
+          <div class="card reveal">
+            <div class="card-head"><div><h3>Live load by zone</h3><p class="sub">Watts right now</p></div></div>
+            <div class="chart" id="chartZones"></div>
+          </div>
+          <div class="card reveal">
+            <div class="card-head"><div><h3>Brightness distribution</h3><p class="sub">Number of lights per brightness band</p></div></div>
+            <div class="chart" id="chartDist"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== MAINTENANCE ===== -->
+      <section class="page" id="page-maintenance">
+        <div class="page-head">
+          <div><h2>Maintenance</h2><p>Every light reports its health. A fault raises an alert, and a repair crew drives from the depot to fix it.</p></div>
+          <div class="head-actions">
+            <label class="switch"><input type="checkbox" id="autoDispatch" checked /><i></i><span>Auto-dispatch</span></label>
+            <button class="btn btn-danger-outline" id="simFault"><svg><use href="#i-alert"/></svg>Simulate fault</button>
+          </div>
+        </div>
+        <div class="fleet" id="fleet"></div>
+        <div class="card reveal">
+          <div class="card-head">
+            <div><h3>Alert log</h3><p class="sub">Faults detected by the network</p></div>
+            <div class="tabs" id="alertFilter">
+              <button class="active" data-f="open">Open</button>
+              <button data-f="resolved">Resolved</button>
+              <button data-f="all">All</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="table" id="alertTable">
+              <thead><tr><th>Time</th><th>Light</th><th>Zone</th><th>Issue</th><th>Severity</th><th>Progress</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <div class="empty" id="alertEmpty"><span class="empty-icon"><svg><use href="#i-check"/></svg></span><b>No alerts</b><span>All monitored lights are healthy.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SCHEDULES ===== -->
+      <section class="page" id="page-schedules">
+        <div class="page-head">
+          <div><h2>Schedules</h2><p>Time-based rules override a zone's base level. Motion sensors can still raise brightness unless the rule switches the zone off.</p></div>
+        </div>
+        <div class="sched-layout">
+          <div class="card reveal">
+            <div class="card-head"><div><h3>24-hour timeline</h3><p class="sub">Enabled rules · the line marks the current time</p></div></div>
+            <div class="timeline" id="timeline"></div>
+            <div class="divider"></div>
+            <ul class="rules" id="rules"></ul>
+          </div>
+          <form class="card rule-form reveal" id="ruleForm">
+            <div class="card-head"><div><h3>New rule</h3><p class="sub">Applies every day</p></div></div>
+            <label>Name<input type="text" id="rName" placeholder="e.g. Festival night" required maxlength="32" /></label>
+            <label>Zone<select id="rZone"></select></label>
+            <div class="two">
+              <label>From<input type="time" id="rFrom" value="22:00" required /></label>
+              <label>To<input type="time" id="rTo" value="05:00" required /></label>
+            </div>
+            <label>Action
+              <select id="rAction"><option value="level">Set base brightness</option><option value="off">Switch off</option></select>
+            </label>
+            <label class="field-range" id="rLevelRow"><span>Brightness <b id="rLevelVal">40%</b></span><input type="range" id="rLevel" min="5" max="100" step="5" value="40" /></label>
+            <button class="btn btn-primary" type="submit"><svg><use href="#i-plus"/></svg>Add rule</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ===== ABOUT ===== -->
+      <section class="page" id="page-about">
+        <div class="about-hero reveal">
+          <div>
+            <span class="eyebrow">Mini Project · CB-334</span>
+            <h2>Smart City Light Management System</h2>
+            <p>A street-lighting platform that switches, dims and monitors every light in a city based on daylight, weather, traffic and time. It cuts energy use while keeping roads safe.</p>
+            <dl class="about-meta">
+              <div><dt>Student</dt><dd>Sadaphule Prathmesh Rahuldeo</dd></div>
+              <div><dt>Registration No.</dt><dd>RBT24CB034</dd></div>
+              <div><dt>Roll No.</dt><dd>CB-334</dd></div>
+            </dl>
+          </div>
+          <canvas id="aboutCanvas" class="about-canvas" aria-hidden="true"></canvas>
+        </div>
+
+        <div class="about-grid">
+          <div class="card reveal">
+            <h3>Problem</h3>
+            <p>Conventional street lights run at full power from dusk to dawn, even on empty streets. Failed lamps go unnoticed until someone complains, and nobody can see or control the network as a whole.</p>
+          </div>
+          <div class="card reveal">
+            <h3>Objectives</h3>
+            <ul class="checks">
+              <li>Switch lights automatically using ambient light (LDR)</li>
+              <li>Dim empty streets and brighten on motion (PIR sensor)</li>
+              <li>Adapt to weather such as rain and fog</li>
+              <li>Detect faults and dispatch maintenance crews</li>
+              <li>Measure energy, cost and CO₂ savings</li>
+            </ul>
+          </div>
+          <div class="card span-2 reveal">
+            <h3>System architecture</h3>
+            <div class="arch">
+              <div class="arch-node"><span class="arch-icon"><svg><use href="#i-bulb"/></svg></span><b>Smart light node</b><span>LED, LDR, PIR sensor, ESP32</span></div>
+              <div class="arch-link"><i></i></div>
+              <div class="arch-node"><span class="arch-icon"><svg><use href="#i-wifi"/></svg></span><b>Zone gateway</b><span>LoRa or Wi-Fi mesh</span></div>
+              <div class="arch-link"><i></i></div>
+              <div class="arch-node"><span class="arch-icon"><svg><use href="#i-grid"/></svg></span><b>Control centre</b><span>Policies, schedules, analytics</span></div>
+              <div class="arch-link"><i></i></div>
+              <div class="arch-node"><span class="arch-icon"><svg><use href="#i-truck"/></svg></span><b>Maintenance</b><span>Alerts and crew dispatch</span></div>
+            </div>
+          </div>
+          <div class="card reveal">
+            <h3>Control logic</h3>
+            <ol class="steps">
+              <li><b>Daylight.</b> If ambient light is above the threshold, the light stays off.</li>
+              <li><b>Base level.</b> The zone policy or active schedule sets the dimmed level.</li>
+              <li><b>Weather.</b> Rain or fog adds 20% for visibility.</li>
+              <li><b>Motion.</b> A vehicle or person in range raises the light to full.</li>
+              <li><b>Fade.</b> The level ramps smoothly, with no flicker.</li>
+            </ol>
+          </div>
+          <div class="card reveal">
+            <h3>Technology</h3>
+            <div class="chips">
+              <span>HTML5</span><span>CSS3</span><span>JavaScript (ES6)</span><span>Canvas 2D</span><span>SVG</span><span>ESP32</span><span>LDR sensor</span><span>PIR sensor</span>
+            </div>
+            <p class="muted">This web app simulates the city. The <code>hardware/</code> folder has a sample ESP32 sketch for a real prototype node.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <a href="#overview" data-page="overview"><svg><use href="#i-grid"/></svg>Overview</a>
+      <a href="#zones" data-page="zones"><svg><use href="#i-layers"/></svg>Zones</a>
+      <a href="#analytics" data-page="analytics"><svg><use href="#i-chart"/></svg>Energy</a>
+      <a href="#maintenance" data-page="maintenance"><svg><use href="#i-wrench"/></svg>Repairs</a>
+      <a href="#schedules" data-page="schedules"><svg><use href="#i-calendar"/></svg>Rules</a>
+      <a href="#about" data-page="about"><svg><use href="#i-info"/></svg>About</a>
+    </nav>
+  </div>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+  <div class="chart-tip" id="chartTip"></div>
+
+  <script src="js/sim.js?v=20261025b"></script>
+  <script src="js/map.js?v=20261025b"></script>
+  <script src="js/scenes.js?v=20261025b"></script>
+  <script src="js/charts.js?v=20261025b"></script>
+  <script src="js/ui.js?v=20261025b"></script>
+  <script src="js/app.js?v=20261025b"></script>
+</body>
+</html>
